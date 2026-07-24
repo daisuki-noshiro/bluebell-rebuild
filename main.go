@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"bluebell-rebuild/logger"
-	"bluebell-rebuild/router"
-	"bluebell-rebuild/setting"
+	"bluebell_rebuild/logger"
+	"bluebell_rebuild/router"
+	"bluebell_rebuild/setting"
 
 	"go.uber.org/zap"
 )
