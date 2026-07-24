@@ -6,10 +6,19 @@ import "github.com/spf13/viper"
 var Conf = new(AppConfig)
 
 type AppConfig struct {
-	Name    string `mapstructure:"name"`
-	Mode    string `mapstructure:"mode"`
-	Port    int    `mapstructure:"port"`
-	Version string `mapstructure:"version"`
+	Name    string    `mapstructure:"name"`
+	Mode    string    `mapstructure:"mode"`
+	Port    int       `mapstructure:"port"`
+	Version string    `mapstructure:"version"`
+	Log     LogConfig `mapstructure:"log"`
+}
+
+type LogConfig struct {
+	Level      string `mapstructure:"level"`
+	Filename   string `mapstructure:"filename"`
+	MaxSize    int    `mapstructure:"max_size"`
+	MaxAge     int    `mapstructure:"max_age"`
+	MaxBackups int    `mapstructure:"max_backups"`
 }
 
 func Init(filePath string) error {

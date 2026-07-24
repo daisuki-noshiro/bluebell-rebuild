@@ -18,7 +18,7 @@ func main() {
 	}
 
 	// 2. 初始化日志
-	if err := logger.Init(setting.Conf.Mode); err != nil {
+	if err := logger.Init(setting.Conf.Log, setting.Conf.Mode); err != nil {
 		log.Fatal("初始化日志失败：", err)
 	}
 

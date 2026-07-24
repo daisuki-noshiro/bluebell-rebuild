@@ -1,10 +1,12 @@
 package logger
 
 import (
+	"bluebell_rebuild/setting"
+
 	"go.uber.org/zap"
 )
 
-func Init(mode string) error {
+func Init(cfg setting.LogConfig, mode string) error {
 	var (
 		lg  *zap.Logger
 		err error
@@ -25,7 +27,14 @@ func Init(mode string) error {
 	// 将lg 替换为Zap的全局logger
 	zap.ReplaceGlobals(lg)
 
-	zap.L().Info("logger init success")
+	zap.L().Info(
+		"logger init success",
+		zap.String("level", cfg.Level),
+		zap.String("filename", cfg.Filename),
+		zap.Int("max_size", cfg.MaxSize),
+		zap.Int("max_age", cfg.MaxAge),
+		zap.Int("max_backups", cfg.MaxBackups),
+	)
 
 	return nil
 }
