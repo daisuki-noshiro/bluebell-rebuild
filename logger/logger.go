@@ -2,8 +2,12 @@ package logger
 
 import (
 	"bluebell_rebuild/setting"
+	"net/http"
 	"os"
+	"runtime/debug"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -85,4 +89,66 @@ func getEncoder() zapcore.Encoder {
 	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
 
 	return zapcore.NewJSONEncoder(encoderConfig) //返回日志格式
+}
+
+// GinLogger 使用Zap记录每一次HTTP请求
+func GinLogger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 记录请求开始时间
+		start := time.Now()
+
+		// 取得请求路径和查询参数
+		path := c.Request.URL.Path
+		query := c.Request.URL.RawQuery
+
+		// 暂停当前中间件，继续执行后面的Controller
+		c.Next()
+
+		// Controller执行完成后，计算本次请求耗时
+		cost := time.Since(start)
+
+		// 使用Zap记录请求信息
+		zap.L().Info(
+			path,
+			zap.Int("status", c.Writer.Status()),
+			zap.String("method", c.Request.Method),
+			zap.String("path", path),
+			zap.String("query", query),
+			zap.String("ip", c.ClientIP()),
+			zap.String("user_agent", c.Request.UserAgent()),
+			zap.Duration("cost", cost),
+		)
+	}
+}
+
+// GinRecovery 捕获接口中的panic，并使用Zap记录
+func GinRecovery(stack bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// defer中的函数会在当前请求结束前执行
+		defer func() {
+			// recover捕获当前请求发生的panic
+			if err := recover(); err != nil {
+				if stack {
+					// 记录错误和完整调用位置
+					zap.L().Error(
+						"panic recovered",
+						zap.Any("error", err),
+						zap.ByteString("stack", debug.Stack()),
+					)
+				} else {
+					// 只记录错误，不记录调用栈
+					zap.L().Error(
+						"panic recovered",
+						zap.Any("error", err),
+					)
+				}
+
+				// 停止继续执行，并返回500状态码
+				c.AbortWithStatus(http.StatusInternalServerError)
+			}
+		}()
+
+		// 继续执行后面的中间件和Controller
+		c.Next()
+	}
 }

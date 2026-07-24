@@ -1,0 +1,9 @@
+# 日志文件
+*.log
+
+# GoLand配置
+.idea/
+
+# 编译产物
+bluebell_rebuild
+bluebell_rebuild.exe

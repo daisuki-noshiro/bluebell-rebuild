@@ -2,16 +2,24 @@ package router
 
 import (
 	"bluebell_rebuild/controller"
+	"bluebell_rebuild/logger"
 
 	"github.com/gin-gonic/gin"
 )
 
-// SetupRouter 创建并配置 Gin 路由
+// SetupRouter 创建并配置Gin路由
 func SetupRouter() *gin.Engine {
-	// 创建一个自带日志和异常恢复功能的 Gin 引擎
-	r := gin.Default()
+	// 创建一个不自带中间件的Gin引擎
+	r := gin.New()
 
-	//注册路由
+	// 使用Zap请求日志和Gin异常恢复
+	r.Use(
+		logger.GinLogger(),
+		logger.GinRecovery(true),
+	)
+
+	// 注册路由
 	r.GET("/ping", controller.PingHandler)
+
 	return r
 }
